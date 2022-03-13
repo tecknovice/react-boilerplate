@@ -2,8 +2,6 @@ import * as React from 'react'
 import Avatar from '@mui/material/Avatar'
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import Checkbox from '@mui/material/Checkbox'
 import Link from '@mui/material/Link'
 import Grid from '@mui/material/Grid'
 import Box from '@mui/material/Box'
@@ -11,16 +9,58 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
 import Typography from '@mui/material/Typography'
 import Container from '@mui/material/Container'
 import Copyright from '../components/copyright'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { post } from '../api/server'
+import Alert from '@mui/material/Alert'
+
+interface Token {
+    access_token: string
+}
 
 export default function SignIn() {
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const navigate = useNavigate()
+
+    const [credential, setCredential] = useState({
+        email: '',
+        password: '',
+    })
+
+    const [errors, setErrors] = useState({
+        auth: '',
+        email: '',
+        password: '',
+    })
+
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = event.target
+        switch (name) {
+            case 'email':
+            case 'password':
+                if (!value) setErrors({ ...errors, [name]: 'Field is required' })
+                else setErrors({ ...errors, [name]: '' })
+                break
+            default:
+                break
+        }
+        setCredential({ ...credential, [name]: value })
+    }
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
-        const data = new FormData(event.currentTarget)
-        // eslint-disable-next-line no-console
-        console.log({
-            email: data.get('email'),
-            password: data.get('password'),
+        const response = await post<Token>('/auth/login', {
+            email: credential.email,
+            password: credential.password,
         })
+        if (response.data) {
+            localStorage.setItem('jwt', response.data.access_token)
+            navigate('/admin')
+        } else if (response.error) {
+            setErrors({ ...errors, auth: response.error })
+        }
+    }
+
+    const handleCloseAlert = () => {
+        setErrors({ ...errors, auth: '' })
     }
 
     return (
@@ -49,7 +89,12 @@ export default function SignIn() {
                         name="email"
                         autoComplete="email"
                         autoFocus
+                        value={credential.email}
+                        onChange={handleChange}
+                        error={Boolean(errors.email)}
+                        helperText={!!errors.email && errors.email}
                     />
+                    <Typography>{errors.email}</Typography>
                     <TextField
                         margin="normal"
                         required
@@ -59,9 +104,28 @@ export default function SignIn() {
                         type="password"
                         id="password"
                         autoComplete="current-password"
+                        value={credential.password}
+                        onChange={handleChange}
+                        error={Boolean(errors.password)}
+                        helperText={!!errors.password && errors.password}
                     />
-                    <FormControlLabel control={<Checkbox value="remember" color="primary" />} label="Remember me" />
-                    <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
+                    {errors.auth && (
+                        <Alert severity="error" onClose={handleCloseAlert}>
+                            {errors.auth}
+                        </Alert>
+                    )}
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="contained"
+                        sx={{ mt: 3, mb: 2 }}
+                        disabled={
+                            !credential.email ||
+                            Boolean(errors.email) ||
+                            !credential.password ||
+                            Boolean(errors.password)
+                        }
+                    >
                         Sign In
                     </Button>
                     <Grid container>

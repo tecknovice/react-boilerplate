@@ -120,7 +120,8 @@ export default function AdminLayout(props: AdminProps) {
             </Drawer>
             <Box
                 sx={{
-                    backgroundColor: (theme) => (theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900]),
+                    backgroundColor: (theme) =>
+                        theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
                     display: 'flex',
                     flexGrow: 1,
                     flexDirection: 'column',

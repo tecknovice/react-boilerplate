@@ -2,8 +2,6 @@ import * as React from 'react'
 import Avatar from '@mui/material/Avatar'
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import Checkbox from '@mui/material/Checkbox'
 import Link from '@mui/material/Link'
 import Grid from '@mui/material/Grid'
 import Box from '@mui/material/Box'
@@ -11,16 +9,22 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
 import Typography from '@mui/material/Typography'
 import Container from '@mui/material/Container'
 import Copyright from '../components/copyright'
+import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
 
 export default function SignUp() {
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const navigate = useNavigate()
+
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
         const data = new FormData(event.currentTarget)
-        // eslint-disable-next-line no-console
-        console.log({
+        await axios.post('/users', {
+            name: data.get('name'),
             email: data.get('email'),
             password: data.get('password'),
+            passwordConfirm: data.get('passwordConfirm'),
         })
+        navigate('/signin')
     }
 
     return (
@@ -37,26 +41,31 @@ export default function SignUp() {
                     <LockOutlinedIcon />
                 </Avatar>
                 <Typography component="h1" variant="h5">
-                    Sign up
+                    {' '}
+                    Sign up{' '}
                 </Typography>
                 <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
                     <Grid container spacing={5}>
-                        <Grid item xs={12} sm={6}>
+                        <Grid item xs={12}>
                             <TextField
-                                autoComplete="given-name"
-                                name="firstName"
                                 required
                                 fullWidth
-                                id="firstName"
-                                label="First Name"
+                                name="name"
+                                id="name"
+                                label="Name"
+                                autoComplete="name"
                                 autoFocus
                             />
                         </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <TextField required fullWidth id="lastName" label="Last Name" name="lastName" autoComplete="family-name" />
-                        </Grid>
                         <Grid item xs={12}>
-                            <TextField required fullWidth id="email" label="Email Address" name="email" autoComplete="email" />
+                            <TextField
+                                required
+                                fullWidth
+                                id="email"
+                                label="Email Address"
+                                name="email"
+                                autoComplete="email"
+                            />
                         </Grid>
                         <Grid item xs={12}>
                             <TextField
@@ -70,9 +79,13 @@ export default function SignUp() {
                             />
                         </Grid>
                         <Grid item xs={12}>
-                            <FormControlLabel
-                                control={<Checkbox value="allowExtraEmails" color="primary" />}
-                                label="I want to receive inspiration, marketing promotions and updates via email."
+                            <TextField
+                                required
+                                fullWidth
+                                name="passwordConfirm"
+                                label="Password Confirm"
+                                type="password"
+                                id="passwordConfirm"
                             />
                         </Grid>
                     </Grid>
