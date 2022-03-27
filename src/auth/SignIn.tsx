@@ -9,16 +9,18 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
 import Typography from '@mui/material/Typography'
 import Container from '@mui/material/Container'
 import Copyright from '../components/copyright'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { post } from '../api/server'
 import Alert from '@mui/material/Alert'
+import withAuth from '../hoc/withAuth'
+import jwtDecode, { JwtPayload } from 'jwt-decode'
 
 interface Token {
     access_token: string
 }
 
-export default function SignIn() {
+function SignIn() {
     const navigate = useNavigate()
 
     const [credential, setCredential] = useState({
@@ -30,6 +32,21 @@ export default function SignIn() {
         auth: '',
         email: '',
         password: '',
+    })
+
+    useEffect(() => {
+        try {
+            const jwt = localStorage.getItem('jwt')
+            if (jwt) {
+                const decodedToken = jwtDecode<JwtPayload>(jwt)
+                const currentTimeStamp = Math.floor(new Date().getTime() / 1000)
+                if (decodedToken.exp && decodedToken.exp > currentTimeStamp) {
+                    navigate('/admin')
+                }
+            }
+        } catch (error) {
+            console.error(error)
+        }
     })
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -146,3 +163,5 @@ export default function SignIn() {
         </Container>
     )
 }
+
+export default SignIn

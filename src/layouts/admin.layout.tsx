@@ -15,6 +15,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import NotificationsIcon from '@mui/icons-material/Notifications'
 import menuItems from './admin.menu'
 import Copyright from '../components/copyright'
+import withAuth from '../hoc/withAuth'
 
 const drawerWidth = 240
 
@@ -66,7 +67,7 @@ interface AdminProps {
     children?: React.ReactNode
 }
 
-export default function AdminLayout(props: AdminProps) {
+function AdminLayout(props: AdminProps) {
     const [open, setOpen] = React.useState(true)
     const toggleDrawer = () => {
         setOpen(!open)
@@ -147,3 +148,5 @@ export default function AdminLayout(props: AdminProps) {
         </Box>
     )
 }
+
+export default withAuth(AdminLayout)

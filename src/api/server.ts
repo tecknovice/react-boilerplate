@@ -2,18 +2,18 @@ import axios from 'axios'
 
 axios.defaults.baseURL = 'http://localhost:3001'
 
-export async function get<T>(url: string) {
+interface Response<T> {
+    data?: T
+    error?: string
+}
+
+export async function get<T>(url: string): Promise<Response<T>> {
     try {
         const response = await axios.get<T>(url)
         return response.data
     } catch (error) {
-        console.error(error)
+        return handleError<T>(error)
     }
-}
-
-interface Response<T> {
-    data?: T
-    error?: string
 }
 
 export async function post<T>(url: string, params: any): Promise<Response<T>> {
